@@ -51,13 +51,14 @@ export default function DoctorWorkspace({ onSuccess, refreshStats }) {
     }
   }, [selectedDoctor]);
 
-  const handleCallNext = async () => {
-    if (!selectedDoctor) return;
+  const handleCallNext = async (doctorId) => {
+    if (!doctorId) return;
     setLoading(true);
     try {
-      const result = await api.callNextPatient(selectedDoctor);
-      onSuccess(`已叫号：${result.patient.name}`, 'success');
-      loadActiveConsultation(selectedDoctor);
+      const result = await api.callNextPatient(doctorId);
+      onSuccess(`${doctors.find((d) => d.id === doctorId)?.name || '医生'}已叫号：${result.patient.name}`, 'success');
+      setSelectedDoctor(doctorId);
+      loadActiveConsultation(doctorId);
       loadDoctors();
       refreshStats();
     } catch (err) {
@@ -153,7 +154,7 @@ export default function DoctorWorkspace({ onSuccess, refreshStats }) {
                   <div className="doctor-actions" onClick={(e) => e.stopPropagation()}>
                     <button
                       className="btn btn-primary"
-                      onClick={handleCallNext}
+                      onClick={() => handleCallNext(doctor.id)}
                       disabled={!doctor.is_available || isBusy || loading}
                     >
                       {loading ? '叫号中...' : '📢 叫下一位'}
